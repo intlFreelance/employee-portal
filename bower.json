@@ -1,0 +1,23 @@
+{
+  "name": "base-app",
+  "description": "",
+  "main": "",
+  "authors": [
+    "Josue Morales <josue.morales.sv@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/intlFreelance/base-app",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "angular": "1.6.1",
+    "jquery": "^3.1.1"
+  }
+}
