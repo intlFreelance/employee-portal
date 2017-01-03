@@ -6,6 +6,9 @@ use App\User;
 use Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use App\Role;
+use Illuminate\Http\Request;
+use Illuminate\Auth\Events\Registered;
 
 class RegisterController extends Controller
 {
@@ -67,5 +70,41 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
+    }
+    
+    public function showCustomerRegistrationForm()
+    {
+        return view('auth.customer-register');
+    }
+    
+    public function showAdminRegistrationForm()
+    {
+        return view('auth.admin-register');
+    }
+    
+    public function registerCustomer(Request $request)
+    {
+        $this->validator($request->all())->validate();
+
+        event(new Registered($user = $this->create($request->all())));
+        $customerRole = Role::where('name', '=', 'customer')->firstOrFail();
+        $user->attachRole($customerRole);
+        $this->guard()->login($user);
+
+        return $this->registered($request, $user)
+            ?: redirect($this->redirectPath());
+    }
+    
+    public function registerAdmin(Request $request)
+    {
+        $this->validator($request->all())->validate();
+
+        event(new Registered($user = $this->create($request->all())));
+        $adminRole = Role::where('name', '=', 'admin')->firstOrFail();
+        $user->attachRole($adminRole);
+        $this->guard()->login($user);
+
+        return $this->registered($request, $user)
+            ?: redirect($this->redirectPath());
     }
 }
