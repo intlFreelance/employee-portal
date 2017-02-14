@@ -72,9 +72,9 @@ class RegisterController extends Controller
         ]);
     }
     
-    public function showCustomerRegistrationForm()
+    public function showEmployeeRegistrationForm()
     {
-        return view('auth.customer-register');
+        return view('auth.employee-register');
     }
     
     public function showAdminRegistrationForm()
@@ -82,13 +82,13 @@ class RegisterController extends Controller
         return view('auth.admin-register');
     }
     
-    public function registerCustomer(Request $request)
+    public function registerEmployee(Request $request)
     {
         $this->validator($request->all())->validate();
-
+        $role = Role::where('name', '=', 'employee')->first();
+        if($role == null) throw new \Exception("Employee Role not found.");
         event(new Registered($user = $this->create($request->all())));
-        $customerRole = Role::where('name', '=', 'customer')->firstOrFail();
-        $user->attachRole($customerRole);
+        $user->attachRole($role);
         $this->guard()->login($user);
 
         return $this->registered($request, $user)
@@ -98,10 +98,10 @@ class RegisterController extends Controller
     public function registerAdmin(Request $request)
     {
         $this->validator($request->all())->validate();
-
+        $role = Role::where('name', '=', 'admin')->first();
+        if($role == null) throw new \Exception("Administrator Role not found.");
         event(new Registered($user = $this->create($request->all())));
-        $adminRole = Role::where('name', '=', 'admin')->firstOrFail();
-        $user->attachRole($adminRole);
+        $user->attachRole($role);
         $this->guard()->login($user);
 
         return $this->registered($request, $user)

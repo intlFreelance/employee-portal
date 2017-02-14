@@ -21,10 +21,10 @@ Route::post('login', 'Auth\LoginController@login');
 Route::post('logout', 'Auth\LoginController@logout');
 
 // Registration Routes...
-Route::get('register-customer', 'Auth\RegisterController@showCustomerRegistrationForm');
+Route::get('register-employee', 'Auth\RegisterController@showEmployeeRegistrationForm');
 Route::get('register-admin', 'Auth\RegisterController@showAdminRegistrationForm');
 
-Route::post('register-customer', 'Auth\RegisterController@registerCustomer');
+Route::post('register-employee', 'Auth\RegisterController@registerEmployee');
 Route::post('register-admin', 'Auth\RegisterController@registerAdmin');
 
 // Password Reset Routes...

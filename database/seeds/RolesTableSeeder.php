@@ -14,7 +14,7 @@ class RolesTableSeeder extends Seeder
         $now = date('Y-m-d H:i:s');
         DB::table('roles')->insert([
             ['name' => 'admin', 'display_name' =>'Administrator', 'description'=>'', 'created_at'=>$now, 'updated_at'=>$now],
-            ['name' => 'customer', 'display_name' => 'Customer', 'description'=>'', 'created_at'=>$now, 'updated_at'=>$now]
+            ['name' => 'employee', 'display_name' => 'Employee', 'description'=>'', 'created_at'=>$now, 'updated_at'=>$now]
         ]);
     }
 }
