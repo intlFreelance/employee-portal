@@ -28,4 +28,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+    public function employeeChecklist(){
+        return $this->hasOne('App\EmployeeChecklist', 'user_id');
+    }
 }

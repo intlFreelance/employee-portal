@@ -34,3 +34,11 @@ Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm
 Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
 Route::get('/home', 'HomeController@index');
+
+Route::group(['middleware'=>'auth'], function () {
+    Route::get('employee/checklist/{id}', 'EmployeeController@checklist');
+    Route::get('employees/get-checklist/{id}', 'EmployeeController@getChecklist');
+    Route::post('employees/save-checklist', 'EmployeeController@saveChecklist');
+    Route::post('employees/upload-checklist-file', 'EmployeeController@uploadChecklistFile');
+    Route::post('employees/delete-uploaded-checklist-file', 'EmployeeController@deleteUploadedChecklistFile');
+});

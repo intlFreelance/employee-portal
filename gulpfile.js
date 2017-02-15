@@ -12,13 +12,18 @@ const elixir = require('laravel-elixir');
  */
 
 elixir(mix => {
-    mix.sass('app.scss')
+    mix.sass([
+        'app.scss',
+    '../../../bower_components/sweetalert2/src/sweetalert2.scss',
+        ])
        .copy('node_modules/bootstrap-sass/assets/fonts','public/fonts')
        .copy('bower_components/bootstrap/dist/css','public/css/bootstrap')
        .scripts([
             '../../../bower_components/angular/angular.min.js',
             '../../../bower_components/jquery/dist/jquery.min.js',
             '../../../bower_components/bootstrap/dist/js/bootstrap.min.js',
+           '../../../bower_components/sweetalert2/dist/sweetalert2.min.js',
             'app.js',
+            '*',
         ], 'public/js/app.js');
 });
