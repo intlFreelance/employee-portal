@@ -36,14 +36,15 @@ class EmployeeController extends Controller
         return view('home');
     }
 
-    public function checklist($id){
+    public function checklist($id, $source){
         $user = Auth::user();
         if(!$user->hasRole('admin')){
             if($user->id != $id){
                 abort(403);
             }
         }
-        return view('employees.checklist')->with('id',$id);
+        $data = ['id'=>$id, 'source'=>$source];
+        return view('employees.checklist', $data);
     }
     public function getChecklist($id){
         try{

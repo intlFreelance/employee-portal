@@ -36,7 +36,7 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 Route::get('/home', 'HomeController@index');
 
 Route::group(['middleware'=>'auth'], function () {
-    Route::get('employee/checklist/{id}', 'EmployeeController@checklist');
+    Route::get('employee/checklist/{id}/{source}', 'EmployeeController@checklist');
     Route::get('employees/get-checklist/{id}', 'EmployeeController@getChecklist');
     Route::post('employees/save-checklist', 'EmployeeController@saveChecklist');
     Route::post('employees/upload-checklist-file', 'EmployeeController@uploadChecklistFile');

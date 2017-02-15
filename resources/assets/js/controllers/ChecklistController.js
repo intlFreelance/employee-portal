@@ -8,7 +8,8 @@ app.controller('ChecklistController', function($scope, $http, $log) {
     $scope.fileModal = fileModal;
     $scope.uploadFile = uploadFile;
     $scope.deleteFile = deleteFile;
-    function loadModel(id){
+    function loadModel(id, source){
+        $scope.source = source;
         $('#uploadModal').on('hidden.bs.modal', function () {
             $scope.uploadType = "";
         })
@@ -30,6 +31,7 @@ app.controller('ChecklistController', function($scope, $http, $log) {
         $http.post('/employees/save-checklist',$scope.checklist).then(function(response){
             var data = response.data;
             if(data.success){
+                window.location = "/"+$scope.source;
                 $log.info(data);
             }else{
                 showSwalError(data.message);
@@ -65,6 +67,8 @@ app.controller('ChecklistController', function($scope, $http, $log) {
                 }
                 $("#uploadModal").modal('toggle');
                 $scope.checklist.status = data.status;
+                document.getElementById("file").value = "";
+                $scope.file = null;
             }else{
                 showSwalError(data.message);
             }

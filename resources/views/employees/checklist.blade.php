@@ -4,7 +4,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
-                <form  ng-controller="ChecklistController" name="checklistForm" ng-init="loadModel({!! $id !!})" novalidate>
+                <form  ng-controller="ChecklistController" name="checklistForm" ng-init="loadModel({!! $id !!}, '{!! $source !!}')" novalidate>
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <div class="panel-title pull-left">
@@ -95,7 +95,7 @@
                             <hr/>
                             <div class="row">
                                 <div class="col-xs-6 col-sm-3 col-md-3 col-sm-push-6 col-md-push-6 ">
-                                    <a href="#"  class="btn btn-block btn-default">Cancel</a>
+                                    <a href="/{!! $source !!}"  class="btn btn-block btn-default">Cancel</a>
                                 </div>
                                 <div class="col-xs-6 col-sm-3 col-md-3 col-sm-push-6 col-md-push-6">
                                     <input type="submit" ng-click="submitForm(checklistForm)"  class="btn btn-block btn-primary" value="Save"/>
@@ -117,7 +117,7 @@
                                             <ng-form name="uploadForm" class="form-inline">
                                                 <div class="form-group" ng-class="uploadForm.$invalid ? 'has-error' : ''">
                                                     <label class="control-label">File</label>
-                                                    <input type="file" file-model="file" class="form-control" />
+                                                    <input type="file" id="file" file-model="file" class="form-control" />
                                                 </div>
                                                 <button type="submit" ng-click="uploadFile(uploadForm)" class="btn btn-primary">Upload</button>
                                                 <button type="button" class="btn btn-danger pull-right" data-dismiss="modal">Close</button>
