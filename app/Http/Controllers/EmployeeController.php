@@ -78,6 +78,16 @@ class EmployeeController extends Controller
                             $icon." ".HTML::link("mailto:$val", $val);
                     }),
                 (new FieldConfig)
+                    ->setName('status')
+                    ->setLabel('Checklist Status')
+                    ->setCallback(function ($val, $row) {
+                        $model = $row->getSrc();
+                        if(($model->employeeChecklist) && $model->employeeChecklist->status == "complete")
+                            return "<span class=\"bg-success\" style=\"color: white;\">&nbsp;Complete&nbsp;</span>";
+                        return "<span class=\"bg-danger\" style=\"color: white;\">&nbsp;Incomplete&nbsp;</span>";
+
+                    }),
+                (new FieldConfig)
                     ->setName('actions')
                     ->setLabel(' ')
                     ->setCallback(function($val, $row){
