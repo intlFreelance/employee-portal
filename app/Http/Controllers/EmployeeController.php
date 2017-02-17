@@ -62,6 +62,7 @@ class EmployeeController extends Controller
                 (new FieldConfig)
                     ->setName('name')
                     ->setLabel('Name')
+                    ->setSortable(true)
                     ->setCallback(function ($val, $row) {
                         $model = $row->getSrc();
                         return $model->name;
