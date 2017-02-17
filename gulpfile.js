@@ -24,6 +24,7 @@ elixir(mix => {
             '../../../bower_components/bootstrap/dist/js/bootstrap.min.js',
            '../../../bower_components/sweetalert2/dist/sweetalert2.min.js',
             'app.js',
+           'deleter.js',
             '*',
         ], 'public/js/app.js');
 });

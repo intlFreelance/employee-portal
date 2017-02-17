@@ -4,12 +4,11 @@
     <div class="container">
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
+                <h2>Employee Checklist</h2>
+                <hr/>
                 <form  ng-controller="ChecklistController" name="checklistForm" ng-init="loadModel({!! $id !!}, '{!! $source !!}')" novalidate>
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <div class="panel-title pull-left">
-                                Employee Checklist
-                            </div>
                             <div class="panel-title pull-right">
                                 <p class="bg-success" style="color: white;" ng-if="checklist.status=='complete'">&nbsp;<% checklist.status %>&nbsp;</p>
                                 <p class="bg-danger" style="color: white;" ng-if="checklist.status!='complete'">&nbsp;<% checklist.status %>&nbsp;</p>
@@ -78,7 +77,7 @@
                                                         <td><% upload.type %></td>
                                                         <td ng-if="upload.fileName">Uploaded</td>
                                                         <td ng-if="!upload.fileName">Not Uploaded</td>
-                                                        <td>
+                                                        <td class="pull-right">
                                                             <a ng-if="upload.fileName" href="/uploads/<% upload.fileName %>" target="_blank" title="Download File" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-download"></span></a>
                                                             <a ng-if="upload.fileName" ng-click="deleteFile(upload)" title="Delete File" class="btn btn-danger btn-sm"><span class="glyphicon glyphicon-remove"></span></a>
                                                             <a ng-if="!upload.fileName" ng-click="fileModal(upload)" title="Upload File" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-upload"></span></a>

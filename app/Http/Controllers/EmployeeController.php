@@ -8,137 +8,163 @@
 
 namespace App\Http\Controllers;
 
-use App\EmployeeChecklist;
+
+use App\Role;
 use App\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Exception;
+
+use HTML;
+use Form;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
+use Nayjest\Grids\Components\ColumnHeadersRow;
+use Nayjest\Grids\Components\FiltersRow;
+use Nayjest\Grids\Components\HtmlTag;
+use Nayjest\Grids\Components\Laravel5\Pager;
+use Nayjest\Grids\Components\OneCellRow;
+use Nayjest\Grids\Components\ShowingRecords;
+use Nayjest\Grids\Components\TFoot;
+use Nayjest\Grids\Components\THead;
+use Nayjest\Grids\EloquentDataProvider;
+use Nayjest\Grids\FieldConfig;
+use Nayjest\Grids\FilterConfig;
+use Nayjest\Grids\Grid;
+use Nayjest\Grids\GridConfig;
+
 
 class EmployeeController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        return view('home');
-    }
 
-    public function checklist($id, $source){
-        $user = Auth::user();
-        if(!$user->hasRole('admin')){
-            if($user->id != $id){
-                abort(403);
-            }
-        }
-        $data = ['id'=>$id, 'source'=>$source];
-        return view('employees.checklist', $data);
-    }
-    public function getChecklist($id){
-        try{
-            $user = User::find($id);
-            if(!$user->hasRole('employee')){
-                throw new Exception("The user {$user->name} doesn't have Employee role assigned.");
-            }
-            $uploadTypes = config('checklist.upload-types');
-            if(!isset($uploadTypes)) throw new Exception("variable 'checklist.upload-types' not set.");
-            $checklist = $user->employeeChecklist;
-            if($checklist == null){
-                $checklist = new EmployeeChecklist();
-                $checklist->user_id = $id;
-                $checklist->uploads = [];
-            }
-            $uploads = $checklist->uploads;
-            foreach($uploadTypes as $uploadType){
-                foreach($checklist->uploads as $upload){
-                    if($upload["type"]==$uploadType){
-                        continue 2;
-                    }
-                }
-                array_push($uploads,["type"=>$uploadType]);
-            }
-            $checklist->uploads = $uploads;
-            $checklist->save();
-            $response = ["success"=>true, "checklist"=>$checklist];
-        }catch(Exception $ex) {
-            $response = ["success"=>false, "message"=>$ex->getMessage()];
-        }
-        return response()->json($response);
-    }
-    public function saveChecklist(Request $request){
-        try{
-            $data = $request->input();
-            $checklist = EmployeeChecklist::find($data["id"]);
-            $checklist->fill($data);
-            $checklist->save();
-            $response = ["success"=>true];
-        }catch(Exception $ex) {
-            $response = ["success"=>false, "message"=>$ex->getMessage()];
-        }
-        return response()->json($response);
-    }
-    public function uploadChecklistFile(Request $request){
-        try{
-            $data = $request->input();
-            $checklist = EmployeeChecklist::find($data['id']);
-            if($checklist == null) throw new Exception("Employee Checklist not found.");
-            $file = $request->file('file');
-            $file_name = $file->getClientOriginalName();
-            $rand = rand(1111,9999);
-            $newFileName="{$rand}-{$file_name}";
-            if (!file_exists(public_path().'/uploads')) {
-                mkdir(public_path().'/uploads',0777, true);
-            }
-            $file->move(public_path("/uploads"), $newFileName);
-            $uploads = $checklist->uploads;
-            foreach($uploads as $key => $upload){
-                if($upload["type"] == $data['uploadType']){
-                    $uploads[$key]["fileName"]=$newFileName;
-                }
-            }
-            $checklist->uploads = $uploads;
-            $checklist->save();
-            $response = ["success"=>true, "fileName"=>$newFileName, "status"=>$checklist->status];
-        }catch(Exception $ex) {
-            $response = ["success"=>false, "message"=>$ex->getMessage()];
-        }
-        return response()->json($response);
-    }
-    public function deleteUploadedChecklistFile(Request $request){
-        try{
-            $data = $request->input();
-            $checklist = EmployeeChecklist::find($data['id']);
-            if($checklist == null) throw new Exception("Employee Checklist not found.");
-            $uploads = $checklist->uploads;
-            foreach($uploads as $key => $upload){
-                if($upload["type"]==$data["type"]){
-                    $file_path = public_path().'/uploads/'.$upload["fileName"];
-                    if(file_exists($file_path)){
-                        unlink($file_path);
-                    }
-                    unset($uploads[$key]["fileName"]);
-                    break;
-                }
-            }
+        $role = Role::where('name', 'employee')->first();
+        if($role == null) throw new Exception('Employee role not found');
+        $cfg = (new GridConfig())
+            ->setDataProvider(
+                new EloquentDataProvider(
+                    (new User())->newQuery()->whereExists(function($query){
+                        $role = Role::where('name', 'employee')->first();
+                        $query->select(DB::raw(1))
+                            ->from('role_user')
+                            ->whereRaw("role_user.user_id = users.id AND role_user.role_id = {$role->id}");
+                    })
+                )
+            )
+            ->setName('employees_grid')
+            ->setColumns([
+                (new FieldConfig)
+                    ->setName('id')
+                    ->setLabel('ID')
+                    ->setSortable(true)
+                    ->setSorting(Grid::SORT_ASC),
+                (new FieldConfig)
+                    ->setName('name')
+                    ->setLabel('Name')
+                    ->setCallback(function ($val, $row) {
+                        $model = $row->getSrc();
+                        return $model->name;
+                    }),
+                (new FieldConfig)
+                    ->setName('email')
+                    ->setSortable(true)
+                    ->setCallback(function ($val) {
+                        if(empty($val)) return "";
+                        $icon = '<span class="glyphicon glyphicon-envelope"></span>';
+                        $icon = HTML::decode(HTML::link("mailto:$val", $icon));
+                        return
+                            $icon." ".HTML::link("mailto:$val", $val);
+                    }),
+                (new FieldConfig)
+                    ->setName('actions')
+                    ->setLabel(' ')
+                    ->setCallback(function($val, $row){
+                        $model = $row->getSrc();
+                        $buttons =
+                            "<div class='btn-group'>
+                                <a href='". route('employees.edit', [$model->id]) ."' class='btn btn-primary btn-xs' title='Login Data'><i class='glyphicon glyphicon-user'></i></a>
+                                <a href='". route('employees.checklist', [$model->id, 'employees']) ."' class='btn btn-default btn-xs' title='Checklist'><i class='glyphicon glyphicon-check'></i></a>
+                                <a href='". route('employees.destroy', [$model->id]) ."' title='Delete' data-delete=''  class='btn btn-danger btn-xs'><i class='glyphicon glyphicon-trash'></i></a>
+                            </div>";
+                        return $buttons;
+                    })
+            ])
+            ->setComponents([
+                (new THead)
+                    ->setComponents([
+                        (new ColumnHeadersRow),
+                        (new FiltersRow)
+                    ]),
+                (new TFoot)
+                    ->setComponents([
+                        (new OneCellRow)
+                            ->setComponents([
+                                new Pager,
+                                (new HtmlTag)
+                                    ->setAttributes(['class' => 'pull-right'])
+                                    ->addComponent(new ShowingRecords),
+                            ])
+                    ])
+            ])
+        ;
+        $grid = (new Grid($cfg))->render();
 
-            $checklist->uploads = $uploads;
-            $checklist->save();
-            $response = ["success"=>true, "type"=>$data["type"], "status"=>$checklist->status];
+        return view('employees.index', compact('grid'));
+    }
+    public function edit($id){
+        try{
+            $user = $this->loadModel($id);
+            return view('employees.edit')->with('employee', $user);
+        }catch(Exception $ex) {
+            Session::flash('error', $ex->getMessage());
+            return redirect(route('employees.index'));
+        }
+    }
+    public function update(Request $request, $id){
+        try{
+            $user = $this->loadModel($id);
+            $this->validate($request, [
+                'name' => 'required|max:255',
+                'email' => 'required|email|max:255|unique:users,email,'.$id,
+                'password'=>'min:6|confirmed',
+            ]);
+            $input = $request->all();
+            if(empty($input["password"])){
+                unset($input["password"]);
+            }else{
+                $input["password"] = bcrypt($input["password"]);
+            }
+            $user->update($input);
+            Session::flash('success','Employee updated successfully.');
+            return redirect(route('employees.index'));
         }catch(Exception $ex){
-            $response = ["success"=>false, "message"=>$ex->getMessage()];
+            Session::flash('error',$ex->getMessage());
+            return redirect(route('employees.index'));
         }
-        return response()->json($response);
     }
+    public function destroy($id)
+    {
+        try{
+            $user = $this->loadModel($id);
+            $user->delete();
+            Session::flash('success','Employee deleted successfully.');
+        }catch(Exception $ex){
+            Session::flash('error', $ex->getMessage());
+        }
+        return redirect(route('employees.index'));
+    }
+
+    private function loadModel($id){
+        $user = User::find($id);
+        if(empty($user)) {
+            throw new Exception('User not found');
+        }
+        if(!$user->hasRole('employee')){
+            throw new Exception('User is not an employee');
+        }
+        return $user;
+    }
+
+
 }

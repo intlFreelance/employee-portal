@@ -5,3 +5,13 @@
 // Variables
 @import "variables";
 
+.column-actions{
+  text-align: right;
+}
+table a:not(.btn), .table a:not(.btn) {
+  text-decoration: none;
+}
+a.text-success{
+  color: #a29b9b;
+  cursor: default;
+}

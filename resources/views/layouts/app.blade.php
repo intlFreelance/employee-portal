@@ -44,7 +44,9 @@
                 <div class="collapse navbar-collapse" id="app-navbar-collapse">
                     <!-- Left Side Of Navbar -->
                     <ul class="nav navbar-nav">
-                        &nbsp;
+                        @if(!Auth::guest() && Auth::user()->hasRole('admin'))
+                            <li><a href="{{ url('/employees') }}"><span class="glyphicon glyphicon-user"></span> Employees</a></li>
+                        @endif
                     </ul>
 
                     <!-- Right Side Of Navbar -->
