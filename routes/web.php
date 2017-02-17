@@ -35,8 +35,7 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
 Route::get('/home', 'HomeController@index');
 
-Route::group(['middleware'=>'auth'], function () {
-    Route::resource('users', 'UserController');
+Route::group(['middleware'=>['auth']], function () {
     Route::get('employees/checklist/{id}/{source}', 'EmployeeChecklistController@checklist')->name('employees.checklist');
     Route::get('employees/get-checklist/{id}', 'EmployeeChecklistController@getChecklist');
     Route::post('employees/save-checklist', 'EmployeeChecklistController@saveChecklist');
@@ -44,7 +43,7 @@ Route::group(['middleware'=>'auth'], function () {
     Route::post('employees/delete-uploaded-checklist-file', 'EmployeeChecklistController@deleteUploadedChecklistFile');
 });
 
-Route::group(['middleware'=>'role:admin'], function(){
+Route::group(['middleware'=>['role:admin']], function(){
     Route::get('employees/','EmployeeController@index')->name('employees.index');
     Route::get('employees/{id}/edit', 'EmployeeController@edit')->name('employees.edit');
     Route::patch('employees/{id}', 'EmployeeController@update')->name('employees.update');

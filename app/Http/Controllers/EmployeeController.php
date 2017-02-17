@@ -28,9 +28,9 @@ use Nayjest\Grids\Components\TFoot;
 use Nayjest\Grids\Components\THead;
 use Nayjest\Grids\EloquentDataProvider;
 use Nayjest\Grids\FieldConfig;
-use Nayjest\Grids\FilterConfig;
 use Nayjest\Grids\Grid;
 use Nayjest\Grids\GridConfig;
+
 
 
 class EmployeeController extends Controller
@@ -38,7 +38,6 @@ class EmployeeController extends Controller
 
     public function index()
     {
-
         $role = Role::where('name', 'employee')->first();
         if($role == null) throw new Exception('Employee role not found');
         $cfg = (new GridConfig())
@@ -124,55 +123,41 @@ class EmployeeController extends Controller
         return view('employees.index', compact('grid'));
     }
     public function edit($id){
-        try{
-            $user = $this->loadModel($id);
-            return view('employees.edit')->with('employee', $user);
-        }catch(Exception $ex) {
-            Session::flash('error', $ex->getMessage());
-            return redirect(route('employees.index'));
-        }
+        $user = $this->loadModel($id);
+        return view('employees.edit')->with('employee', $user);
     }
     public function update(Request $request, $id){
-        try{
-            $user = $this->loadModel($id);
-            $this->validate($request, [
-                'name' => 'required|max:255',
-                'email' => 'required|email|max:255|unique:users,email,'.$id,
-                'password'=>'min:6|confirmed',
-            ]);
-            $input = $request->all();
-            if(empty($input["password"])){
-                unset($input["password"]);
-            }else{
-                $input["password"] = bcrypt($input["password"]);
-            }
-            $user->update($input);
-            Session::flash('success','Employee updated successfully.');
-            return redirect(route('employees.index'));
-        }catch(Exception $ex){
-            Session::flash('error',$ex->getMessage());
-            return redirect(route('employees.index'));
+        $user = $this->loadModel($id);
+        $this->validate($request, [
+            'name' => 'required|max:255',
+            'email' => 'required|email|max:255|unique:users,email,'.$id,
+            'password'=>'min:6|confirmed',
+        ]);
+        $input = $request->all();
+        if(empty($input["password"])){
+            unset($input["password"]);
+        }else{
+            $input["password"] = bcrypt($input["password"]);
         }
+        $user->update($input);
+        Session::flash('success','Employee updated successfully.');
+        return redirect(route('employees.index'));
     }
     public function destroy($id)
     {
-        try{
-            $user = $this->loadModel($id);
-            $user->delete();
-            Session::flash('success','Employee deleted successfully.');
-        }catch(Exception $ex){
-            Session::flash('error', $ex->getMessage());
-        }
+        $user = $this->loadModel($id);
+        $user->delete();
+        Session::flash('success','Employee deleted successfully.');
         return redirect(route('employees.index'));
     }
 
     private function loadModel($id){
         $user = User::find($id);
         if(empty($user)) {
-            throw new Exception('User not found');
+            abort(404);
         }
         if(!$user->hasRole('employee')){
-            throw new Exception('User is not an employee');
+            abort(404);
         }
         return $user;
     }
